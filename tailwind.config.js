@@ -3,7 +3,12 @@ export default {
   content: [],
   purge: ['./index.html', './src/**/*.{vue,js,ts}'],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'custom-green': '#18a058',
+        'main-bg': '#18181c'
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 }
