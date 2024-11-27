@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-// import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { NButton, NInput, NInputGroup, useMessage } from 'naive-ui'
 import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
 
@@ -15,7 +15,7 @@ const onPaste = async () => {
 }
 
 const message = useMessage()
-// const router = useRouter()
+const router = useRouter()
 const goToRoom = () => {
   if (true) {
     return message.error('Комната не найдена')
@@ -49,9 +49,13 @@ const goToRoom = () => {
       </div>
       <div class="wrapper">
         <h2 class="head">Создайте свою комнату, и пригласите друзей!</h2>
-        <router-link :to="{ name: 'CreateRoom' }">
-          <n-button type="primary" class="w-full"> Создать </n-button>
-        </router-link>
+        <n-button
+          type="primary"
+          class="w-full"
+          @click="router.push({ name: 'CreateRoom' })"
+        >
+          Создать
+        </n-button>
       </div>
     </div>
   </div>
