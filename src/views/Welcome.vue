@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import { NButton, NInput, NInputGroup } from 'naive-ui'
-import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
+import { NButton, NInput, NInputGroup, useMessage } from 'naive-ui'
+import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
 
 const roomCode = ref('')
 
 const onPaste = async () => {
   try {
-    const text = await navigator.clipboard.readText()
-    if (onlyAllowNumber(text)) {
-      roomCode.value = text
-    }
+    roomCode.value = await navigator.clipboard.readText()
   } catch (err) {
     console.error(err)
   }
 }
 
-const router = useRouter()
+const message = useMessage()
+// const router = useRouter()
 const goToRoom = () => {
-  router.push({ name: 'Game', params: { roomId: roomCode.value } })
+  if (true) {
+    return message.error('Комната не найдена')
+  }
+  // router.push({ name: 'Game', params: { roomId: roomCode.value } })
 }
 </script>
 
