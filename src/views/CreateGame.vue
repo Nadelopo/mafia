@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   NInput,
   NInputNumber,
   NForm,
   NFormItem,
   NSelect,
-  NButton
+  NButton,
+  useThemeVars
 } from 'naive-ui'
 import type { SelectMixedOption } from 'naive-ui/es/select/src/interface'
-import { useRouter } from 'vue-router'
 
 type Role = { name: string; id: number; isRoleDark: boolean }
 
@@ -27,24 +28,24 @@ const selectOptions: SelectMixedOption[] = data
   .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
   .map((e) => ({
     value: e.id,
-    label: e.name
+    label: e.name,
+    type: e.isRoleDark ? 'error' : 'success'
   }))
 
 const roles = ref<(Role & { count: number })[]>([])
 const onSelect = (rolesId: number[]) => {
-  roles.value = rolesId
-    .reduce<(Role & { count: number })[]>((acc, item) => {
-      const currentRoly = roles.value.find((el) => el.id === item)
-      if (currentRoly !== undefined) {
-        acc.push(currentRoly)
-        return acc
-      }
-      const role = data.find((el) => el.id === item)
-      if (!role) return acc
-      acc.push({ ...role, count: 1 })
+  roles.value = rolesId.reduce<(Role & { count: number })[]>((acc, id) => {
+    const existingRole = roles.value.find((role) => role.id === id)
+    if (existingRole) {
+      acc.push(existingRole)
       return acc
-    }, [])
-    .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
+    }
+    const role = data.find((el) => el.id === id)
+    if (role) {
+      acc.push({ ...role, count: 1 })
+    }
+    return acc
+  }, [])
 }
 
 const getMaxCount = (id: number) => {
@@ -66,7 +67,7 @@ const isFormSubmitDisabled = computed(
   () => !playersCount.value || !roles.value.length
 )
 
-const onClear = async () => {
+const onClearRoles = async () => {
   await nextTick()
   playersCount.value = 0
 }
@@ -76,6 +77,8 @@ const onSubmit = () => {
   const gameId = Math.floor(Math.random() * 100000)
   router.push({ name: 'Game', params: { gameId } })
 }
+
+const themeVars = useThemeVars()
 </script>
 
 <template>
@@ -92,7 +95,7 @@ const onSubmit = () => {
           clearable
           placeholder=""
           class="w-full"
-          @clear="onClear"
+          @clear="onClearRoles"
         />
       </n-form-item>
 
@@ -106,7 +109,14 @@ const onSubmit = () => {
         />
       </n-form-item>
 
-      <n-form-item v-for="role in roles" :key="role.id" :label="role.name">
+      <n-form-item
+        v-for="role in roles"
+        :key="role.id"
+        :label="role.name"
+        :label-style="{
+          color: role.isRoleDark ? themeVars.errorColor : themeVars.successColor
+        }"
+      >
         <n-input-number
           v-model:value="role.count"
           :max="getMaxCount(role.id)"
@@ -114,7 +124,11 @@ const onSubmit = () => {
           class="w-full"
         />
       </n-form-item>
-      <n-form-item v-if="roles.length" label="мирный житель">
+      <n-form-item
+        v-if="roles.length"
+        label="мирный житель"
+        :label-style="{ color: themeVars.successColor }"
+      >
         <n-input
           :value="String(playersCount - totalCountWithoutPeacefulInhabitant)"
           disabled
