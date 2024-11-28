@@ -1,52 +1,26 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watchEffect } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import {
   NInput,
   NInputNumber,
   NForm,
   NFormItem,
   NSelect,
-  NButton,
-  type FormInst,
-  type FormRules,
-  type FormItemRule
+  NButton
 } from 'naive-ui'
 import type { SelectMixedOption } from 'naive-ui/es/select/src/interface'
+import { useRouter } from 'vue-router'
 
-type Role = { name: string; id: number }
+type Role = { name: string; id: number; isRoleDark: boolean }
 
-interface Form {
-  playersCount: number
-  roles: number[]
-}
-
-const formRef = ref<FormInst | null>(null)
-const form = ref<Form>({
-  playersCount: 9,
-  roles: []
-})
-
-const rules: FormRules = {
-  players: [
-    {
-      required: true,
-      validator(rule: FormItemRule, value: string) {
-        if (!value) {
-          return new Error('Это поле обязательно для заполнения')
-        }
-        return true
-      },
-      trigger: ['input', 'blur']
-    }
-  ]
-}
+const playersCount = ref(9)
 
 const data: Role[] = [
-  { name: 'мафия', id: 0 },
-  { name: 'комисар', id: 1 },
-  { name: 'доктор', id: 2 },
-  { name: 'путана', id: 3 },
-  { name: 'маньяк', id: 4 }
+  { name: 'мафия', id: 0, isRoleDark: true },
+  { name: 'комисар', id: 1, isRoleDark: false },
+  { name: 'доктор', id: 2, isRoleDark: false },
+  { name: 'путана', id: 3, isRoleDark: false },
+  { name: 'маньяк', id: 4, isRoleDark: false }
 ]
 
 const selectOptions: SelectMixedOption[] = data.map((e) => ({
@@ -55,24 +29,19 @@ const selectOptions: SelectMixedOption[] = data.map((e) => ({
 }))
 
 const roles = ref<(Role & { count: number })[]>([])
-watchEffect(() => {
-  roles.value = form.value.roles.reduce<(Role & { count: number })[]>(
-    (acc, item) => {
-      const currentRoly = roles.value.find((el) => el.id === item)
-      if (currentRoly !== undefined) {
-        acc.push(currentRoly)
-        return acc
-      }
-      const role = data.find((el) => el.id === item)
-      if (!role) return acc
-      acc.push({ ...role, count: 1 })
+const onSelect = (rolesId: number[]) => {
+  roles.value = rolesId.reduce<(Role & { count: number })[]>((acc, item) => {
+    const currentRoly = roles.value.find((el) => el.id === item)
+    if (currentRoly !== undefined) {
+      acc.push(currentRoly)
       return acc
-    },
-    []
-  )
-
-  // roles.value = []
-})
+    }
+    const role = data.find((el) => el.id === item)
+    if (!role) return acc
+    acc.push({ ...role, count: 1 })
+    return acc
+  }, [])
+}
 
 const getMaxCount = (id: number) => {
   const total = roles.value.reduce((sum, val) => {
@@ -82,37 +51,39 @@ const getMaxCount = (id: number) => {
     return sum
   }, 0)
 
-  return form.value.playersCount - total
+  return playersCount.value - total
 }
 
-const totalCount = computed(() =>
+const totalCountWithoutPeacefulInhabitant = computed(() =>
   roles.value.reduce((sum, val) => (sum += val.count), 0)
 )
-const isFormSubmitDisabled = computed(() => {
-  const isRolesNotAssigned =
-    totalCount.value < form.value.playersCount ||
-    totalCount.value > form.value.playersCount
-  return form.value.playersCount === 0 || isRolesNotAssigned
-})
+
+const isFormSubmitDisabled = computed(
+  () => !playersCount.value || !roles.value.length
+)
 
 const onClear = async () => {
   await nextTick()
-  form.value.playersCount = 0
+  playersCount.value = 0
+}
+
+const router = useRouter()
+const onSubmit = () => {
+  const roomId = Math.floor(Math.random() * 100000)
+  router.push({ name: 'Game', params: { roomId } })
 }
 </script>
 
 <template>
   <div class="flex flex-col items-center">
     <n-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
       class="w-80 flex flex-col justify-center"
+      @submit.prevent="onSubmit"
     >
       <h1 class="text-2xl mb-4">Создайте свою игру</h1>
       <n-form-item path="playersCount" label="Количество игроков">
         <n-input-number
-          v-model:value="form.playersCount"
+          v-model:value="playersCount"
           min="0"
           clearable
           placeholder=""
@@ -123,11 +94,11 @@ const onClear = async () => {
 
       <n-form-item>
         <n-select
-          v-model:value="form.roles"
-          :disabled="form.playersCount === 0"
-          multiple
+          :disabled="playersCount === 0"
           :options="selectOptions"
+          multiple
           placeholder="Выберите роли"
+          @update:value="onSelect"
         />
       </n-form-item>
 
@@ -139,12 +110,19 @@ const onClear = async () => {
           class="w-full"
         />
       </n-form-item>
-      <n-form-item label="мирный житель">
-        <!-- <div class="w-36 text-base">мирный житель</div> -->
-        <n-input :value="String(form.playersCount - totalCount)" disabled />
+      <n-form-item v-if="roles.length" label="мирный житель">
+        <n-input
+          :value="String(playersCount - totalCountWithoutPeacefulInhabitant)"
+          disabled
+        />
       </n-form-item>
 
-      <n-button :disabled="isFormSubmitDisabled" type="primary" class="mt-2">
+      <n-button
+        :disabled="isFormSubmitDisabled"
+        type="primary"
+        attr-type="submit"
+        class="mt-2"
+      >
         Создать
       </n-button>
     </n-form>
