@@ -4,11 +4,11 @@ import { useRouter } from 'vue-router'
 import { NButton, NInput, NInputGroup, useMessage } from 'naive-ui'
 import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
 
-const roomCode = ref('')
+const gameCode = ref('')
 
 const onPaste = async () => {
   try {
-    roomCode.value = await navigator.clipboard.readText()
+    gameCode.value = await navigator.clipboard.readText()
   } catch (err) {
     console.error(err)
   }
@@ -16,11 +16,11 @@ const onPaste = async () => {
 
 const message = useMessage()
 const router = useRouter()
-const goToRoom = () => {
+const goToGame = () => {
   if (true) {
-    return message.error('Комната не найдена')
+    return message.error('Игра не найдена')
   }
-  // router.push({ name: 'Game', params: { roomId: roomCode.value } })
+  // router.push({ name: 'Game', params: { gameId: gameCode.value } })
 }
 </script>
 
@@ -28,31 +28,31 @@ const goToRoom = () => {
   <div class="flex flex-col justify-center items-center min-h-lvh">
     <h1 class="text-xl mb-10 text-center sm:text-2xl md:text-3xl">
       <div>Добро пожаловать в Мафию!</div>
-      <div>Создай комнату или присоединись к игре!</div>
+      <div>Создай игру или присоединись к существующей!</div>
     </h1>
     <div class="content flex gap-6 flex-col md:flex-row">
       <div class="wrapper">
         <h2 class="head">Введите код, чтобы попасть в существующую игру</h2>
         <n-input-group>
           <n-input
-            v-model:value="roomCode"
+            v-model:value="gameCode"
             type="text"
             :allow-input="onlyAllowNumber"
-            placeholder="код комнаты"
+            placeholder="код"
             maxlength="10"
           />
-          <n-button v-if="roomCode" type="primary" @click="goToRoom">
+          <n-button v-if="gameCode" type="primary" @click="goToGame">
             Войти
           </n-button>
           <n-button v-else type="primary" @click="onPaste"> Вставить </n-button>
         </n-input-group>
       </div>
       <div class="wrapper">
-        <h2 class="head">Создайте свою комнату, и пригласите друзей!</h2>
+        <h2 class="head">Создайте свою игру, и пригласите друзей!</h2>
         <n-button
           type="primary"
           class="w-full"
-          @click="router.push({ name: 'CreateRoom' })"
+          @click="router.push({ name: 'CreateGame' })"
         >
           Создать
         </n-button>

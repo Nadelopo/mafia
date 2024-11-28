@@ -69,8 +69,8 @@ const onClear = async () => {
 
 const router = useRouter()
 const onSubmit = () => {
-  const roomId = Math.floor(Math.random() * 100000)
-  router.push({ name: 'Game', params: { roomId } })
+  const gameId = Math.floor(Math.random() * 100000)
+  router.push({ name: 'Game', params: { gameId } })
 }
 </script>
 
