@@ -1,5 +1,8 @@
 import './assets/main.scss'
 
+import 'vfonts/Lato.css'
+import 'vfonts/FiraCode.css'
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 

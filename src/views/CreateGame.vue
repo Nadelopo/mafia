@@ -16,31 +16,35 @@ type Role = { name: string; id: number; isRoleDark: boolean }
 const playersCount = ref(9)
 
 const data: Role[] = [
-  { name: 'мафия', id: 0, isRoleDark: true },
   { name: 'комисар', id: 1, isRoleDark: false },
   { name: 'доктор', id: 2, isRoleDark: false },
+  { name: 'мафия', id: 0, isRoleDark: true },
   { name: 'путана', id: 3, isRoleDark: false },
-  { name: 'маньяк', id: 4, isRoleDark: false }
+  { name: 'маньяк', id: 4, isRoleDark: true }
 ]
 
-const selectOptions: SelectMixedOption[] = data.map((e) => ({
-  value: e.id,
-  label: e.name
-}))
+const selectOptions: SelectMixedOption[] = data
+  .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
+  .map((e) => ({
+    value: e.id,
+    label: e.name
+  }))
 
 const roles = ref<(Role & { count: number })[]>([])
 const onSelect = (rolesId: number[]) => {
-  roles.value = rolesId.reduce<(Role & { count: number })[]>((acc, item) => {
-    const currentRoly = roles.value.find((el) => el.id === item)
-    if (currentRoly !== undefined) {
-      acc.push(currentRoly)
+  roles.value = rolesId
+    .reduce<(Role & { count: number })[]>((acc, item) => {
+      const currentRoly = roles.value.find((el) => el.id === item)
+      if (currentRoly !== undefined) {
+        acc.push(currentRoly)
+        return acc
+      }
+      const role = data.find((el) => el.id === item)
+      if (!role) return acc
+      acc.push({ ...role, count: 1 })
       return acc
-    }
-    const role = data.find((el) => el.id === item)
-    if (!role) return acc
-    acc.push({ ...role, count: 1 })
-    return acc
-  }, [])
+    }, [])
+    .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
 }
 
 const getMaxCount = (id: number) => {
