@@ -1,7 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { NConfigProvider, darkTheme, NMessageProvider } from 'naive-ui'
+</script>
 
 <template>
-  <RouterView />
+  <n-config-provider :theme="darkTheme">
+    <n-message-provider>
+      <RouterView />
+    </n-message-provider>
+  </n-config-provider>
 </template>
 
 <style scoped></style>

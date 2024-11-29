@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --main-green: #63e2b7;
+  --main-bg: #18181c;
+}
+
+body {
+  background: var(--main-bg);
+  color: rgba(255, 255, 255, 0.82);
+  padding: 12px;
+}
