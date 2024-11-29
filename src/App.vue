@@ -1,7 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Layout from '@/Components/Layout.vue'
+</script>
 
 <template>
-  <RouterView />
+  <n-message-provider>
+    <layout>
+      <router-view />
+    </layout>
+  </n-message-provider>
 </template>
 
 <style scoped></style>
