@@ -73,7 +73,7 @@ export type Database = {
           created_at: string
           gameId: number
           id: number
-          roleId: number
+          roleId: number | null
           status: Database['public']['Enums']['game_player_status']
           userId: number
         }
@@ -81,7 +81,7 @@ export type Database = {
           created_at?: string
           gameId: number
           id?: number
-          roleId: number
+          roleId?: number | null
           status: Database['public']['Enums']['game_player_status']
           userId: number
         }
@@ -89,7 +89,7 @@ export type Database = {
           created_at?: string
           gameId?: number
           id?: number
-          roleId?: number
+          roleId?: number | null
           status?: Database['public']['Enums']['game_player_status']
           userId?: number
         }
@@ -121,25 +121,28 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          leaderId: number
           maxPlayers: number
-          userId: number
+          roles: Json
         }
         Insert: {
           created_at?: string
           id?: number
+          leaderId: number
           maxPlayers: number
-          userId: number
+          roles?: Json
         }
         Update: {
           created_at?: string
           id?: number
+          leaderId?: number
           maxPlayers?: number
-          userId?: number
+          roles?: Json
         }
         Relationships: [
           {
-            foreignKeyName: 'games_userId_fkey'
-            columns: ['userId']
+            foreignKeyName: 'games_leaderId_fkey'
+            columns: ['leaderId']
             isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
@@ -257,6 +260,27 @@ export type Tables<
         Row: infer R
       }
       ? R
+      : never
+    : never
+
+export type TablesRow<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema['Tables']
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Row: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
+    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+        Row: infer I
+      }
+      ? I
       : never
     : never
 
