@@ -15,7 +15,7 @@ export type Database = {
           gameId: number
           id: number
           playerId: number | null
-          targetId: number | null
+          targetId: string | null
           turn: number
         }
         Insert: {
@@ -23,7 +23,7 @@ export type Database = {
           gameId: number
           id?: number
           playerId?: number | null
-          targetId?: number | null
+          targetId?: string | null
           turn: number
         }
         Update: {
@@ -31,7 +31,7 @@ export type Database = {
           gameId?: number
           id?: number
           playerId?: number | null
-          targetId?: number | null
+          targetId?: string | null
           turn?: number
         }
         Relationships: [
@@ -65,7 +65,7 @@ export type Database = {
           id: number
           roleId: number | null
           status: Database['public']['Enums']['game_player_status']
-          userId: number
+          userId: string
         }
         Insert: {
           created_at?: string
@@ -73,7 +73,7 @@ export type Database = {
           id?: number
           roleId?: number | null
           status: Database['public']['Enums']['game_player_status']
-          userId: number
+          userId: string
         }
         Update: {
           created_at?: string
@@ -81,7 +81,7 @@ export type Database = {
           id?: number
           roleId?: number | null
           status?: Database['public']['Enums']['game_player_status']
-          userId?: number
+          userId?: string
         }
         Relationships: [
           {
@@ -111,21 +111,21 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          leaderId: number
+          leaderId: string
           maxPlayers: number
           roles: Json
         }
         Insert: {
           created_at?: string
           id?: number
-          leaderId: number
+          leaderId: string
           maxPlayers: number
           roles?: Json
         }
         Update: {
           created_at?: string
           id?: number
-          leaderId?: number
+          leaderId?: string
           maxPlayers?: number
           roles?: Json
         }
@@ -167,19 +167,19 @@ export type Database = {
         Row: {
           created_at: string
           email: string
-          id: number
+          id: string
           name: string
         }
         Insert: {
           created_at?: string
           email: string
-          id?: number
+          id: string
           name: string
         }
         Update: {
           created_at?: string
           email?: string
-          id?: number
+          id?: string
           name?: string
         }
         Relationships: []
