@@ -1,43 +1,33 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useMessage, type FormInst } from 'naive-ui'
-// import type { FormInst } from 'naive-ui'
-
-// Ссылки и состояние
+import { supabase } from '@/supabase'
 
 const isLoginMode = ref(true)
 const formAuthRef = ref<FormInst | null>(null)
-const formLoginRef = ref<FormInst | null>(null)
 const message = useMessage()
 const size = ref<'small' | 'medium' | 'large'>('small')
 
-// Данные формы
-const formAuthValue = ref({
+const formValue = ref({
   email: '',
   name: '',
   password: ''
 })
 
-const formLoginValue = ref({
-  email: '',
-  password: ''
-})
-
-// Правила валидации
-const rules = {
-  email: [
-    { required: true, message: 'Email is required', trigger: 'blur' },
-    {
-      type: 'email',
-      message: 'Please enter a valid email',
-      trigger: ['blur', 'input']
-    }
-  ],
-  name: [
-    { required: true, message: 'Name is required', trigger: 'blur' },
+const rules =  computed(() => ({
+    email: [
+      { required: true, message: 'Email is required', trigger: 'blur' },
+      {
+        type: 'email',
+        message: 'Please enter a valid email',
+        trigger: ['blur', 'input']
+      }
+    ],
+      name: [
+    { required: !isLoginMode.value , message: 'Name is required', trigger: 'blur' },
     { min: 2, message: 'Name must be at least 2 characters', trigger: 'blur' }
   ],
-  password: [
+    password: [
     { required: true, message: 'Password is required', trigger: 'blur' },
     {
       min: 6,
@@ -45,103 +35,126 @@ const rules = {
       trigger: ['blur', 'input']
     }
   ]
-}
+}))
 
-// Обработчик валидации
-const handleValidateClick = (e: MouseEvent) => {
-  e.preventDefault()
+const onSubmit = () => {
   formAuthRef.value?.validate((errors) => {
     if (!errors) {
       message.success('Valid')
+      auth(isLoginMode.value ? 'signIn' : 'signUp')
     } else {
-      console.log(errors)
-      message.error('Invalid')
+      message.error('Invalid input')
     }
   })
 }
+
+const auth = async (type: 'signUp' | 'signIn') => {
+  if (type === 'signUp') {
+    const { data, error } = await supabase.auth.signUp({
+      email: formValue.value.email,
+      password: formValue.value.password
+    })
+
+    if (error || !data.user) {
+      console.error(error)
+      message.error('Registration failed')
+      return
+    }
+
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert({
+        name: formValue.value.name,
+        email: formValue.value.email,
+        id: data.user.id
+      })
+
+    if (insertError) console.error(insertError)
+  }
+
+  if (type === 'signIn') {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: formValue.value.email,
+      password: formValue.value.password
+    })
+
+    if (error) {
+      message.error('Login failed')
+      return
+    }
+  }
+}
 </script>
 
-<template>
-  <div class="flex items-center justify-center min-h-lvh">
-    <div v-if="isLoginMode">
-      <n-form
-        ref="formLoginRef"
-        :label-width="80"
-        :model="formLoginValue"
-        :rules="rules"
-        :size="size"
-      >
-        <n-form-item label="Email" path="email">
-          <n-input
-            v-model:value="formLoginValue.email"
-            :size="size"
-            placeholder="Input Email"
-          />
-        </n-form-item>
-        <n-form-item label="Пароль" path="password">
-          <n-input
-            v-model:value="formLoginValue.password"
-            :size="size"
-            placeholder="Phone Number"
-          />
-        </n-form-item>
-        <n-form-item inline>
-          <div class="flex flex-col w-full">
-            <n-button
-              type="primary"
-              class="mr-3 w-full"
-              @click="handleValidateClick"
-            >
-              Войти
-            </n-button>
-            <p class="mt-2 text-center">Нет аккаунта сучка ? тогда</p>
-            <n-button type="primary" quaternary @click="(isLoginMode = false)">
-              Регистрируйся
-            </n-button>
-          </div>
-        </n-form-item>
-      </n-form>
-    </div>
 
-    <div v-if="!isLoginMode">
-      <n-form
-        ref="formAuthRef"
-        :label-width="80"
-        :model="formAuthValue"
-        :rules="rules"
-        :size="size"
-      >
-        <n-form-item label="Email" path="email">
-          <n-input
-            v-model:value="formAuthValue.email"
-            :size="size"
-            placeholder="Input Email"
-          />
-        </n-form-item>
-        <n-form-item label="Имя" path="name">
-          <n-input
-            v-model:value="formAuthValue.name"
-            :size="size"
-            placeholder="Input Name"
-          />
-        </n-form-item>
-        <n-form-item label="Пароль" path="password">
-          <n-input
-            v-model:value="formAuthValue.password"
-            :size="size"
-            placeholder="Phone Number"
-          />
-        </n-form-item>
-        <n-form-item>
-          <n-button type="primary" class="mr-3" @click="handleValidateClick"
-            >Регистрация
-          </n-button>
-          <p class="mr-1">или</p>
-          <n-button type="primary" quaternary @click="(isLoginMode = true)"
-            >Войти
-          </n-button>
-        </n-form-item>
-      </n-form>
-    </div>
+<template>
+  <div class="flex items-center justify-center min-h-screen">
+    <n-card class="w-96">
+      <transition name="fade" mode="out-in">
+        <n-form
+          ref="formAuthRef"
+          :key="isLoginMode ? 'login-form' : 'signup-form'"
+          :label-width="80"
+          :model="formValue"
+          :rules="rules"
+          :size="size"
+          @submit.prevent="onSubmit"
+        >
+          <n-form-item label="Email" path="email">
+            <n-input
+              v-model:value="formValue.email"
+              :size="size"
+              placeholder="Введите Email"
+            />
+          </n-form-item>
+
+          <n-form-item v-if="!isLoginMode" label="Имя" path="name">
+            <n-input
+              v-model:value="formValue.name"
+              :size="size"
+              placeholder="Введите имя"
+            />
+          </n-form-item>
+
+          <n-form-item label="Пароль" path="password">
+            <n-input
+              v-model:value="formValue.password"
+              :size="size"
+              placeholder="Введите пароль"
+              type="password"
+            />
+          </n-form-item>
+
+          <n-form-item>
+            <n-button type="primary" attr-type="submit" class="w-full">
+              {{ isLoginMode ? 'Войти' : 'Регистрация' }}
+            </n-button>
+          </n-form-item>
+
+          <n-form-item class="flex items-center justify-center w-full">
+            <div class="flex justify-center">
+              <n-button
+                quaternary
+                round
+                type="info"
+                class="text-sm"
+                @click="isLoginMode = !isLoginMode"
+              >
+                {{ isLoginMode ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите' }}
+              </n-button>
+            </div>
+          </n-form-item>
+        </n-form>
+      </transition>
+    </n-card>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+</style>
