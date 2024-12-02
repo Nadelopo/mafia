@@ -229,7 +229,7 @@ export type Tables<
 
 export type Table = keyof Database['public']['Tables']
 
-export type TableRow<
+export type TablesRow<
   PublicTableNameOrOptions extends
     | keyof PublicSchema['Tables']
     | { schema: keyof Database },
