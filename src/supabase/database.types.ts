@@ -14,54 +14,44 @@ export type Database = {
           created_at: string
           gameId: number
           id: number
-          roleId: number
+          playerId: number | null
           targetId: number | null
           turn: number
-          userId: number
         }
         Insert: {
           created_at?: string
           gameId: number
           id?: number
-          roleId: number
+          playerId?: number | null
           targetId?: number | null
           turn: number
-          userId: number
         }
         Update: {
           created_at?: string
           gameId?: number
           id?: number
-          roleId?: number
+          playerId?: number | null
           targetId?: number | null
           turn?: number
-          userId?: number
         }
         Relationships: [
           {
             foreignKeyName: 'actions_gameId_fkey'
             columns: ['gameId']
             isOneToOne: false
-            referencedRelation: 'game_players'
+            referencedRelation: 'games'
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'actions_roleId_fkey'
-            columns: ['roleId']
+            foreignKeyName: 'actions_playerId_fkey'
+            columns: ['playerId']
             isOneToOne: false
-            referencedRelation: 'roles'
+            referencedRelation: 'game_players'
             referencedColumns: ['id']
           },
           {
             foreignKeyName: 'actions_targetId_fkey'
             columns: ['targetId']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'actions_userId_fkey'
-            columns: ['userId']
             isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
@@ -149,53 +139,27 @@ export type Database = {
           }
         ]
       }
-      logs: {
-        Row: {
-          created_at: string
-          gameId: number
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          gameId: number
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          gameId?: number
-          id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'logs_gameId_fkey'
-            columns: ['gameId']
-            isOneToOne: false
-            referencedRelation: 'games'
-            referencedColumns: ['id']
-          }
-        ]
-      }
       roles: {
         Row: {
           abilities: string
           created_at: string
           description: string
           id: number
-          name: string
+          title: string
         }
         Insert: {
           abilities: string
           created_at?: string
           description: string
           id?: number
-          name: string
+          title: string
         }
         Update: {
           abilities?: string
           created_at?: string
           description?: string
           id?: number
-          name?: string
+          title?: string
         }
         Relationships: []
       }
@@ -263,7 +227,9 @@ export type Tables<
       : never
     : never
 
-export type TablesRow<
+export type Table = keyof Database['public']['Tables']
+
+export type TableRow<
   PublicTableNameOrOptions extends
     | keyof PublicSchema['Tables']
     | { schema: keyof Database },
