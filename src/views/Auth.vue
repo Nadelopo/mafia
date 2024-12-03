@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useMessage, type FormInst } from 'naive-ui'
 import { supabase } from '@/supabase'
 
@@ -52,6 +53,7 @@ const onSubmit = () => {
   })
 }
 
+const router = useRouter()
 const auth = async (type: 'signUp' | 'signIn') => {
   if (type === 'signUp') {
     const { data, error } = await supabase.auth.signUp({
@@ -85,6 +87,7 @@ const auth = async (type: 'signUp' | 'signIn') => {
       return
     }
   }
+  router.push({ name: 'Welcome' })
 }
 </script>
 
