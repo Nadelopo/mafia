@@ -17,6 +17,11 @@ const router = createRouter({
       path: '/create-room',
       name: 'CreateRoom',
       component: () => import('../views/CreateRoom.vue')
+    },
+    {
+      path: '/auth',
+      name: 'Auth',
+      component: () => import('@/views/Auth.vue')
     }
   ]
 })
