@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Layout from '@/Components/Layout.vue'
 import { supabase } from '@/supabase'
 import { ref } from 'vue'
 import {useUserStore} from '@/stores/userStore'
@@ -18,9 +17,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 
 <template>
   <n-message-provider>
-    <layout>
       <router-view />
-    </layout>
   </n-message-provider>
 </template>
 
