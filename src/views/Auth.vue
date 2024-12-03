@@ -1,6 +1,15 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { useMessage, type FormInst } from 'naive-ui'
+import {
+  useMessage,
+  NForm,
+  NInput,
+  NButton,
+  NCard,
+  NFormItem,
+  type FormInst,
+  type FormRules
+} from 'naive-ui'
 import { supabase } from '@/supabase'
 
 const isLoginMode = ref(true)
@@ -14,7 +23,7 @@ const formValue = ref({
   password: ''
 })
 
-const rules = computed(() => ({
+const rules = computed<FormRules>(() => ({
   email: [
     { required: true, message: 'Email is required', trigger: 'blur' },
     {

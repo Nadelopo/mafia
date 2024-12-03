@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { NMessageProvider } from 'naive-ui'
 import { supabase } from '@/supabase'
 import { useUserStore } from '@/stores/userStore'
 
