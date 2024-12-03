@@ -14,20 +14,24 @@ const formValue = ref({
   password: ''
 })
 
-const rules =  computed(() => ({
-    email: [
-      { required: true, message: 'Email is required', trigger: 'blur' },
-      {
-        type: 'email',
-        message: 'Please enter a valid email',
-        trigger: ['blur', 'input']
-      }
-    ],
-      name: [
-    { required: !isLoginMode.value , message: 'Name is required', trigger: 'blur' },
+const rules = computed(() => ({
+  email: [
+    { required: true, message: 'Email is required', trigger: 'blur' },
+    {
+      type: 'email',
+      message: 'Please enter a valid email',
+      trigger: ['blur', 'input']
+    }
+  ],
+  name: [
+    {
+      required: !isLoginMode.value,
+      message: 'Name is required',
+      trigger: 'blur'
+    },
     { min: 2, message: 'Name must be at least 2 characters', trigger: 'blur' }
   ],
-    password: [
+  password: [
     { required: true, message: 'Password is required', trigger: 'blur' },
     {
       min: 6,
@@ -61,13 +65,11 @@ const auth = async (type: 'signUp' | 'signIn') => {
       return
     }
 
-    const { error: insertError } = await supabase
-      .from('users')
-      .insert({
-        name: formValue.value.name,
-        email: formValue.value.email,
-        id: data.user.id
-      })
+    const { error: insertError } = await supabase.from('users').insert({
+      name: formValue.value.name,
+      email: formValue.value.email,
+      id: data.user.id
+    })
 
     if (insertError) console.error(insertError)
   }
@@ -85,7 +87,6 @@ const auth = async (type: 'signUp' | 'signIn') => {
   }
 }
 </script>
-
 
 <template>
   <div class="flex items-center justify-center min-h-screen">
@@ -138,9 +139,13 @@ const auth = async (type: 'signUp' | 'signIn') => {
                 round
                 type="info"
                 class="text-sm"
-                @click="isLoginMode = !isLoginMode"
+                @click="(isLoginMode = !isLoginMode)"
               >
-                {{ isLoginMode ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите' }}
+                {{
+                  isLoginMode
+                    ? 'Нет аккаунта? Зарегистрируйтесь'
+                    : 'Уже есть аккаунт? Войдите'
+                }}
               </n-button>
             </div>
           </n-form-item>
@@ -151,10 +156,12 @@ const auth = async (type: 'signUp' | 'signIn') => {
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease-in-out;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>

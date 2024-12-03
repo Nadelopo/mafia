@@ -6,9 +6,9 @@ const router = createRouter({
     {
       path: '/auth',
       name: 'Auth',
-      component: () => import('@/views/Auth.vue'),
-    },
-  ],
+      component: () => import('@/views/Auth.vue')
+    }
+  ]
 })
 
 export default router

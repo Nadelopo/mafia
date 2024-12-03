@@ -263,7 +263,7 @@ export type Tables<
 
 export type TablesRow<
   PublicTableNameOrOptions extends
-      | keyof PublicSchema['Tables']
+    | keyof PublicSchema['Tables']
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
@@ -281,7 +281,6 @@ export type TablesRow<
       ? I
       : never
     : never
-
 
 export type TablesInsert<
   PublicTableNameOrOptions extends

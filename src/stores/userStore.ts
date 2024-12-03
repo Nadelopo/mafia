@@ -1,7 +1,7 @@
+import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { TablesRow } from '@/supabase/database.types'
-import {ref} from 'vue'
 import { supabase } from '@/supabase'
+import type { TablesRow } from '@/supabase/database.types'
 
 export type UserStore = TablesRow<'users'>
 
@@ -24,6 +24,6 @@ export const useUserStore = defineStore('userStore', () => {
 
   return {
     user,
-    setUser,
+    setUser
   }
 })

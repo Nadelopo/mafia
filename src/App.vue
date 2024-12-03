@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { supabase } from '@/supabase'
 import { ref } from 'vue'
-import {useUserStore} from '@/stores/userStore'
+import { supabase } from '@/supabase'
+import { useUserStore } from '@/stores/userStore'
 
-const { setUser} = useUserStore()
+const { setUser } = useUserStore()
 
 const eventValue = ref('')
 supabase.auth.onAuthStateChange(async (event, session) => {
   if (eventValue.value !== event) {
     setUser(session?.user.id)
     eventValue.value = event
-
   }
 })
 </script>
 
 <template>
   <n-message-provider>
-      <router-view />
+    <router-view />
   </n-message-provider>
 </template>
 
