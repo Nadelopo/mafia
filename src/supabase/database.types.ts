@@ -200,19 +200,19 @@ export type Database = {
         Row: {
           created_at: string
           email: string
-          id: number
+          id: string
           name: string
         }
         Insert: {
           created_at?: string
           email: string
-          id?: number
+          id?: string
           name: string
         }
         Update: {
           created_at?: string
           email?: string
-          id?: number
+          id?: string
           name?: string
         }
         Relationships: []
@@ -258,6 +258,27 @@ export type Tables<
         Row: infer R
       }
       ? R
+      : never
+    : never
+
+export type TablesRow<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema['Tables']
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+    : never = never
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
+      Row: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
+    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+        Row: infer I
+      }
+      ? I
       : never
     : never
 
