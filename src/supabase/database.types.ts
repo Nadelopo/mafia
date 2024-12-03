@@ -6,6 +6,11 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type GameRole = {
+  id: number
+  count: number
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -121,23 +126,23 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          leaderId: number
+          leaderId: string
           maxPlayers: number
-          roles: Json
+          roles: GameRole[]
         }
         Insert: {
           created_at?: string
           id?: number
-          leaderId: number
+          leaderId: string
           maxPlayers: number
-          roles?: Json
+          roles?: GameRole[]
         }
         Update: {
           created_at?: string
           id?: number
-          leaderId?: number
+          leaderId?: string
           maxPlayers?: number
-          roles?: Json
+          roles?: GameRole[]
         }
         Relationships: [
           {
@@ -181,21 +186,24 @@ export type Database = {
           created_at: string
           description: string
           id: number
-          name: string
+          title: string
+          isRoleDark: boolean
         }
         Insert: {
           abilities: string
           created_at?: string
           description: string
           id?: number
-          name: string
+          title: string
+          isRoleDark?: boolean
         }
         Update: {
           abilities?: string
           created_at?: string
           description?: string
           id?: number
-          name?: string
+          title?: string
+          isRoleDark?: boolean
         }
         Relationships: []
       }
