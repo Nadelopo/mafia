@@ -167,7 +167,7 @@ export type Database = {
           }
         ]
       }
-      rooms: {
+      games: {
         Row: {
           created_at: string
           id: number
