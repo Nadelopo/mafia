@@ -6,50 +6,55 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type GameRole = {
+  id: number
+  count: number
+}
+
 export type Database = {
   public: {
     Tables: {
       actions: {
         Row: {
           created_at: string
+          gameId: number
           id: number
           roleId: number
-          roomId: number
           targetId: number | null
           turn: number
           userId: number
         }
         Insert: {
           created_at?: string
+          gameId: number
           id?: number
           roleId: number
-          roomId: number
           targetId?: number | null
           turn: number
           userId: number
         }
         Update: {
           created_at?: string
+          gameId?: number
           id?: number
           roleId?: number
-          roomId?: number
           targetId?: number | null
           turn?: number
           userId?: number
         }
         Relationships: [
           {
+            foreignKeyName: 'actions_gameId_fkey'
+            columns: ['gameId']
+            isOneToOne: false
+            referencedRelation: 'game_players'
+            referencedColumns: ['id']
+          },
+          {
             foreignKeyName: 'actions_roleId_fkey'
             columns: ['roleId']
             isOneToOne: false
             referencedRelation: 'roles'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'actions_roomId_fkey'
-            columns: ['roomId']
-            isOneToOne: false
-            referencedRelation: 'room_players'
             referencedColumns: ['id']
           },
           {
@@ -68,98 +73,48 @@ export type Database = {
           }
         ]
       }
-      logs: {
+      game_players: {
         Row: {
           created_at: string
+          gameId: number
           id: number
-          roomId: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          roomId: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          roomId?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'logs_roomId_fkey'
-            columns: ['roomId']
-            isOneToOne: false
-            referencedRelation: 'rooms'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      roles: {
-        Row: {
-          abilities: string
-          created_at: string
-          description: string
-          id: number
-          name: string
-        }
-        Insert: {
-          abilities: string
-          created_at?: string
-          description: string
-          id?: number
-          name: string
-        }
-        Update: {
-          abilities?: string
-          created_at?: string
-          description?: string
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
-      room_players: {
-        Row: {
-          created_at: string
-          id: number
-          roleId: number
-          roomId: number
-          status: Database['public']['Enums']['room_player_status']
+          roleId: number | null
+          status: Database['public']['Enums']['game_player_status']
           userId: number
         }
         Insert: {
           created_at?: string
+          gameId: number
           id?: number
-          roleId: number
-          roomId: number
-          status: Database['public']['Enums']['room_player_status']
+          roleId?: number | null
+          status: Database['public']['Enums']['game_player_status']
           userId: number
         }
         Update: {
           created_at?: string
+          gameId?: number
           id?: number
-          roleId?: number
-          roomId?: number
-          status?: Database['public']['Enums']['room_player_status']
+          roleId?: number | null
+          status?: Database['public']['Enums']['game_player_status']
           userId?: number
         }
         Relationships: [
           {
-            foreignKeyName: 'room_players_roleId_fkey'
+            foreignKeyName: 'game_players_gameId_fkey'
+            columns: ['gameId']
+            isOneToOne: false
+            referencedRelation: 'games'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'game_players_roleId_fkey'
             columns: ['roleId']
             isOneToOne: false
             referencedRelation: 'roles'
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'room_players_roomId_fkey'
-            columns: ['roomId']
-            isOneToOne: false
-            referencedRelation: 'rooms'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'room_players_userId_fkey'
+            foreignKeyName: 'game_players_userId_fkey'
             columns: ['userId']
             isOneToOne: false
             referencedRelation: 'users'
@@ -171,30 +126,86 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          leaderId: string
           maxPlayers: number
-          userId: number
+          roles: GameRole[]
         }
         Insert: {
           created_at?: string
           id?: number
+          leaderId: string
           maxPlayers: number
-          userId: number
+          roles?: GameRole[]
         }
         Update: {
           created_at?: string
           id?: number
+          leaderId?: string
           maxPlayers?: number
-          userId?: number
+          roles?: GameRole[]
         }
         Relationships: [
           {
-            foreignKeyName: 'rooms_userId_fkey'
-            columns: ['userId']
+            foreignKeyName: 'games_leaderId_fkey'
+            columns: ['leaderId']
             isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
           }
         ]
+      }
+      logs: {
+        Row: {
+          created_at: string
+          gameId: number
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          gameId: number
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          gameId?: number
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'logs_gameId_fkey'
+            columns: ['gameId']
+            isOneToOne: false
+            referencedRelation: 'games'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      roles: {
+        Row: {
+          abilities: string
+          created_at: string
+          description: string
+          id: number
+          title: string
+          isRoleDark: boolean
+        }
+        Insert: {
+          abilities: string
+          created_at?: string
+          description: string
+          id?: number
+          title: string
+          isRoleDark?: boolean
+        }
+        Update: {
+          abilities?: string
+          created_at?: string
+          description?: string
+          id?: number
+          title?: string
+          isRoleDark?: boolean
+        }
+        Relationships: []
       }
       users: {
         Row: {
@@ -225,7 +236,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      room_player_status: 'killed' | 'prison' | 'play'
+      game_player_status: 'killed' | 'prison' | 'play'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -234,7 +245,6 @@ export type Database = {
 }
 
 type PublicSchema = Database[Extract<keyof Database, 'public'>]
-export type Table = keyof PublicSchema['Tables']
 
 export type Tables<
   PublicTableNameOrOptions extends

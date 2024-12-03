@@ -2,9 +2,9 @@
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
-const roomId = Number(route.params.roomId)
+const gameId = Number(route.params.gameId)
 </script>
 
 <template>
-  <div>game {{ roomId }}</div>
+  <div>game {{ gameId }}</div>
 </template>
