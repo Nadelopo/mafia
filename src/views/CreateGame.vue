@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, onBeforeMount, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import {
   NInput,
   NInputNumber,
@@ -11,71 +12,100 @@ import {
   useThemeVars
 } from 'naive-ui'
 import type { SelectMixedOption } from 'naive-ui/es/select/src/interface'
+import { supabase } from '@/supabase'
+import { useUserStore } from '@/stores/userStore'
+import type { TablesRow } from '@/supabase/database.types'
 
-type Role = { name: string; id: number; isRoleDark: boolean }
+type Role = { title: string; id: number; isRoleDark: boolean }
 
-const playersCount = ref(9)
+const totalPlayers = ref(9)
 
-const data: Role[] = [
-  { name: 'комисар', id: 1, isRoleDark: false },
-  { name: 'доктор', id: 2, isRoleDark: false },
-  { name: 'мафия', id: 0, isRoleDark: true },
-  { name: 'путана', id: 3, isRoleDark: false },
-  { name: 'маньяк', id: 4, isRoleDark: true }
-]
+const roles = ref<TablesRow<'roles'>[]>([])
+const selectOptions = ref<SelectMixedOption[]>([])
 
-const selectOptions: SelectMixedOption[] = data
-  .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
-  .map((e) => ({
-    value: e.id,
-    label: e.name,
-    type: e.isRoleDark ? 'error' : 'success'
-  }))
+onBeforeMount(async () => {
+  const { data, error } = await supabase.from('roles').select()
+  if (error) return
+  roles.value = data
+  selectOptions.value = data
+    .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
+    .map((e) => ({
+      value: e.id,
+      label: e.title,
+      type: e.isRoleDark ? 'error' : 'success'
+    }))
+})
 
-const roles = ref<(Role & { count: number })[]>([])
+const selectedRoles = ref<(Role & { count: number })[]>([])
 const onSelect = (rolesId: number[]) => {
-  roles.value = rolesId.reduce<(Role & { count: number })[]>((acc, id) => {
-    const existingRole = roles.value.find((role) => role.id === id)
-    if (existingRole) {
-      acc.push(existingRole)
+  selectedRoles.value = rolesId.reduce<(Role & { count: number })[]>(
+    (acc, id) => {
+      const existingRole = selectedRoles.value.find((role) => role.id === id)
+      if (existingRole) {
+        acc.push(existingRole)
+        return acc
+      }
+      const role = roles.value.find((el) => el.id === id)
+      if (role) {
+        acc.push({ ...role, count: 1 })
+      }
       return acc
-    }
-    const role = data.find((el) => el.id === id)
-    if (role) {
-      acc.push({ ...role, count: 1 })
-    }
-    return acc
-  }, [])
+    },
+    []
+  )
 }
 
 const getMaxCount = (id: number) => {
-  const total = roles.value.reduce((sum, val) => {
+  const total = selectedRoles.value.reduce((sum, val) => {
     if (val.id !== id) {
       sum += val.count
     }
     return sum
   }, 0)
 
-  return playersCount.value - total
+  return totalPlayers.value - total
 }
 
 const totalCountWithoutPeacefulInhabitant = computed(() =>
-  roles.value.reduce((sum, val) => (sum += val.count), 0)
+  selectedRoles.value.reduce((sum, val) => (sum += val.count), 0)
 )
 
 const isFormSubmitDisabled = computed(
-  () => !playersCount.value || !roles.value.length
+  () => !totalPlayers.value || !selectedRoles.value.length
 )
 
 const onClearRoles = async () => {
   await nextTick()
-  playersCount.value = 0
+  totalPlayers.value = 0
 }
 
 const router = useRouter()
-const onSubmit = () => {
-  const gameId = Math.floor(Math.random() * 100000)
-  router.push({ name: 'Game', params: { gameId } })
+
+const { user } = storeToRefs(useUserStore())
+const onSubmit = async () => {
+  if (!user.value) return
+
+  const peacefulInhabitant = {
+    count: totalPlayers.value - totalCountWithoutPeacefulInhabitant.value,
+    id: -1
+  }
+  const { data, error } = await supabase
+    .from('games')
+    .insert({
+      leaderId: user.value.id,
+      maxPlayers: totalPlayers.value,
+      roles: [
+        ...selectedRoles.value.map((role) => ({
+          id: role.id,
+          count: role.count
+        })),
+        peacefulInhabitant
+      ]
+    })
+    .select('id')
+    .single()
+  if (error) return
+  router.push({ name: 'Game', params: { gameId: data.id } })
 }
 
 const themeVars = useThemeVars()
@@ -90,7 +120,7 @@ const themeVars = useThemeVars()
       <h1 class="text-2xl mb-4">Создайте свою игру</h1>
       <n-form-item path="playersCount" label="Количество игроков">
         <n-input-number
-          v-model:value="playersCount"
+          v-model:value="totalPlayers"
           min="0"
           clearable
           placeholder=""
@@ -101,7 +131,7 @@ const themeVars = useThemeVars()
 
       <n-form-item>
         <n-select
-          :disabled="playersCount === 0"
+          :disabled="totalPlayers === 0"
           :options="selectOptions"
           multiple
           placeholder="Выберите роли"
@@ -110,9 +140,9 @@ const themeVars = useThemeVars()
       </n-form-item>
 
       <n-form-item
-        v-for="role in roles"
+        v-for="role in selectedRoles"
         :key="role.id"
-        :label="role.name"
+        :label="role.title"
         :label-style="{
           color: role.isRoleDark ? themeVars.errorColor : themeVars.successColor
         }"
@@ -125,12 +155,12 @@ const themeVars = useThemeVars()
         />
       </n-form-item>
       <n-form-item
-        v-if="roles.length"
+        v-if="selectedRoles.length"
         label="мирный житель"
         :label-style="{ color: themeVars.successColor }"
       >
         <n-input
-          :value="String(playersCount - totalCountWithoutPeacefulInhabitant)"
+          :value="String(totalPlayers - totalCountWithoutPeacefulInhabitant)"
           disabled
         />
       </n-form-item>

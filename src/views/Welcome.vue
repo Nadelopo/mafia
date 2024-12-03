@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NInput, NInputGroup, useMessage } from 'naive-ui'
+import { supabase } from '@/supabase'
 import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/userStore'
 
 const gameCode = ref('')
 
@@ -14,13 +17,30 @@ const onPaste = async () => {
   }
 }
 
+const { user } = storeToRefs(useUserStore())
 const message = useMessage()
 const router = useRouter()
-const goToGame = () => {
-  if (true) {
+const connectToGame = async () => {
+  if (!user.value) return
+  const { error } = await supabase
+    .from('games')
+    .select('id')
+    .eq('id', gameCode.value)
+    .single()
+  if (error) {
     return message.error('Игра не найдена')
   }
-  // router.push({ name: 'Game', params: { gameId: gameCode.value } })
+
+  const { error: createPlayerError } = await supabase
+    .from('game_players')
+    .insert({
+      gameId: Number(gameCode.value),
+      status: 'play',
+      userId: user.value.id
+    })
+
+  if (createPlayerError && createPlayerError.code !== '23505') return
+  router.push({ name: 'Game', params: { gameId: gameCode.value } })
 }
 </script>
 
@@ -41,7 +61,7 @@ const goToGame = () => {
             placeholder="код"
             maxlength="10"
           />
-          <n-button v-if="gameCode" type="primary" @click="goToGame">
+          <n-button v-if="gameCode" type="primary" @click="connectToGame">
             Войти
           </n-button>
           <n-button v-else type="primary" @click="onPaste"> Вставить </n-button>
