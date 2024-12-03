@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { NButton, NInput, NInputGroup, useMessage } from 'naive-ui'
+import { supabase } from '@/supabase'
 import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
 
 const roomCode = ref('')
@@ -16,11 +17,16 @@ const onPaste = async () => {
 
 const message = useMessage()
 const router = useRouter()
-const goToRoom = () => {
-  if (true) {
+const connectToGame = async () => {
+  const { error } = await supabase
+    .from('games')
+    .select('id')
+    .eq('id', roomCode.value)
+    .single()
+  if (error) {
     return message.error('Комната не найдена')
   }
-  // router.push({ name: 'Game', params: { roomId: roomCode.value } })
+  router.push({ name: 'Game', params: { roomId: roomCode.value } })
 }
 </script>
 
@@ -41,7 +47,7 @@ const goToRoom = () => {
             placeholder="код комнаты"
             maxlength="10"
           />
-          <n-button v-if="roomCode" type="primary" @click="goToRoom">
+          <n-button v-if="roomCode" type="primary" @click="connectToGame">
             Войти
           </n-button>
           <n-button v-else type="primary" @click="onPaste"> Вставить </n-button>
