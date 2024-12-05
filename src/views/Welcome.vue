@@ -20,15 +20,24 @@ const onPaste = async () => {
 const { user } = storeToRefs(useUserStore())
 const message = useMessage()
 const router = useRouter()
+
+const pushToGame = (gameId: string | number) =>
+  router.push({ name: 'Game', params: { gameId } })
+
 const connectToGame = async () => {
   if (!user.value) return
-  const { error } = await supabase
+
+  const { data: game, error } = await supabase
     .from('games')
-    .select('id')
+    .select(' leaderId')
     .eq('id', gameCode.value)
     .single()
   if (error) {
     return message.error('Игра не найдена')
+  }
+
+  if (game.leaderId === user.value.id) {
+    return pushToGame(gameCode.value)
   }
 
   const { error: createPlayerError } = await supabase
@@ -39,8 +48,21 @@ const connectToGame = async () => {
       userId: user.value.id
     })
 
-  if (createPlayerError && createPlayerError.code !== '23505') return
-  router.push({ name: 'Game', params: { gameId: gameCode.value } })
+  if (createPlayerError) {
+    if (createPlayerError.code === '23505') {
+      message.warning('Вы уже в игре')
+      const { data: player } = await supabase
+        .from('game_players')
+        .select('gameId')
+        .eq('userId', user.value.id)
+        .single()
+      if (player) {
+        pushToGame(player.gameId)
+      }
+    }
+    return
+  }
+  pushToGame(gameCode.value)
 }
 </script>
 
