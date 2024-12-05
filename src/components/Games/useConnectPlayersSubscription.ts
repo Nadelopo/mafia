@@ -1,12 +1,7 @@
+import { inject, onUnmounted, watch } from 'vue'
 import { supabase } from '@/supabase'
 import type { TablesRow } from '@/supabase/database.types'
 import { gameInjectionKey } from '@/views/Game/gameInjection'
-import { inject, onUnmounted, watch } from 'vue'
-
-// type Player = TablesRow<'game_players'> & {
-//   users: Pick<TablesRow<'users'>, 'name'>
-//   roles: TablesRow<'roles'> | null
-// }
 
 export const useConnectPlayersSubscription = (
   playersLength: () => number,
