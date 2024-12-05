@@ -101,6 +101,8 @@ export type Database = {
           description: string
           id: number
           name: string
+          img: string
+          title: string
         }
         Insert: {
           abilities: string
@@ -108,6 +110,8 @@ export type Database = {
           description: string
           id?: number
           name: string
+          img: string
+          title: string
         }
         Update: {
           abilities?: string
@@ -115,6 +119,8 @@ export type Database = {
           description?: string
           id?: number
           name?: string
+          img: string
+          title: string
         }
         Relationships: []
       }

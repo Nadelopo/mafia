@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
-import { useMessage, type FormInst } from 'naive-ui'
+import { computed, ref } from 'vue'
+import { type FormInst, useMessage } from 'naive-ui'
 import { supabase } from '@/supabase'
 
 const isLoginMode = ref(true)
@@ -89,7 +89,7 @@ const auth = async (type: 'signUp' | 'signIn') => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen">
+  <div class="flex items-center justify-center min-h-screen p-5">
     <n-card class="w-96">
       <transition name="fade" mode="out-in">
         <n-form
@@ -160,6 +160,7 @@ const auth = async (type: 'signUp' | 'signIn') => {
 .fade-leave-active {
   transition: opacity 0.3s ease-in-out;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
