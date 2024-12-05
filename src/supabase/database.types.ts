@@ -119,6 +119,7 @@ export type Database = {
           leaderId: string
           maxPlayers: number
           roles: GameRole[]
+          gameActive: boolean
         }
         Insert: {
           created_at?: string
@@ -126,6 +127,7 @@ export type Database = {
           leaderId: string
           maxPlayers: number
           roles?: GameRole[]
+          gameActive?: boolean
         }
         Update: {
           created_at?: string
@@ -133,6 +135,7 @@ export type Database = {
           leaderId?: string
           maxPlayers?: number
           roles?: GameRole[]
+          gameActive?: boolean
         }
         Relationships: [
           {
