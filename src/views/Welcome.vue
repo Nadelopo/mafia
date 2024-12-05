@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { NButton, NInput, NInputGroup, useMessage } from 'naive-ui'
 import { supabase } from '@/supabase'
 import { onlyAllowNumber } from '@/shared/utils/onlyAllowNumber'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/userStore'
 
 const gameCode = ref('')
 
@@ -15,17 +17,29 @@ const onPaste = async () => {
   }
 }
 
+const { user } = storeToRefs(useUserStore())
 const message = useMessage()
 const router = useRouter()
 const connectToGame = async () => {
+  if (!user.value) return
   const { error } = await supabase
     .from('games')
     .select('id')
     .eq('id', gameCode.value)
     .single()
   if (error) {
-    return message.error('Комната не найдена')
+    return message.error('Игра не найдена')
   }
+
+  const { error: createPlayerError } = await supabase
+    .from('game_players')
+    .insert({
+      gameId: Number(gameCode.value),
+      status: 'play',
+      userId: user.value.id
+    })
+
+  if (createPlayerError && createPlayerError.code !== '23505') return
   router.push({ name: 'Game', params: { gameId: gameCode.value } })
 }
 </script>

@@ -19,54 +19,44 @@ export type Database = {
           created_at: string
           gameId: number
           id: number
-          roleId: number
-          targetId: number | null
+          playerId: number | null
+          targetId: string | null
           turn: number
-          userId: number
         }
         Insert: {
           created_at?: string
           gameId: number
           id?: number
-          roleId: number
-          targetId?: number | null
+          playerId?: number | null
+          targetId?: string | null
           turn: number
-          userId: number
         }
         Update: {
           created_at?: string
           gameId?: number
           id?: number
-          roleId?: number
-          targetId?: number | null
+          playerId?: number | null
+          targetId?: string | null
           turn?: number
-          userId?: number
         }
         Relationships: [
           {
             foreignKeyName: 'actions_gameId_fkey'
             columns: ['gameId']
             isOneToOne: false
-            referencedRelation: 'game_players'
+            referencedRelation: 'games'
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'actions_roleId_fkey'
-            columns: ['roleId']
+            foreignKeyName: 'actions_playerId_fkey'
+            columns: ['playerId']
             isOneToOne: false
-            referencedRelation: 'roles'
+            referencedRelation: 'game_players'
             referencedColumns: ['id']
           },
           {
             foreignKeyName: 'actions_targetId_fkey'
             columns: ['targetId']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'actions_userId_fkey'
-            columns: ['userId']
             isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
@@ -80,7 +70,7 @@ export type Database = {
           id: number
           roleId: number | null
           status: Database['public']['Enums']['game_player_status']
-          userId: number
+          userId: string
         }
         Insert: {
           created_at?: string
@@ -88,7 +78,7 @@ export type Database = {
           id?: number
           roleId?: number | null
           status: Database['public']['Enums']['game_player_status']
-          userId: number
+          userId: string
         }
         Update: {
           created_at?: string
@@ -96,7 +86,7 @@ export type Database = {
           id?: number
           roleId?: number | null
           status?: Database['public']['Enums']['game_player_status']
-          userId?: number
+          userId?: string
         }
         Relationships: [
           {
@@ -129,6 +119,7 @@ export type Database = {
           leaderId: string
           maxPlayers: number
           roles: GameRole[]
+          gameActive: boolean
         }
         Insert: {
           created_at?: string
@@ -136,6 +127,7 @@ export type Database = {
           leaderId: string
           maxPlayers: number
           roles?: GameRole[]
+          gameActive?: boolean
         }
         Update: {
           created_at?: string
@@ -143,6 +135,7 @@ export type Database = {
           leaderId?: string
           maxPlayers?: number
           roles?: GameRole[]
+          gameActive?: boolean
         }
         Relationships: [
           {
@@ -150,32 +143,6 @@ export type Database = {
             columns: ['leaderId']
             isOneToOne: false
             referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      logs: {
-        Row: {
-          created_at: string
-          gameId: number
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          gameId: number
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          gameId?: number
-          id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'logs_gameId_fkey'
-            columns: ['gameId']
-            isOneToOne: false
-            referencedRelation: 'games'
             referencedColumns: ['id']
           }
         ]
@@ -217,7 +184,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
-          id?: string
+          id: string
           name: string
         }
         Update: {
@@ -270,6 +237,8 @@ export type Tables<
       ? R
       : never
     : never
+
+export type Table = keyof Database['public']['Tables']
 
 export type TablesRow<
   PublicTableNameOrOptions extends
