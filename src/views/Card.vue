@@ -1,21 +1,17 @@
 <script setup lang="ts">
+import { onBeforeMount, ref } from 'vue'
 import { supabase } from '@/supabase'
-import { onMounted, ref } from 'vue'
 import type { TablesRow } from '@/supabase/database.types'
 
 const roles = ref<TablesRow<'roles'>[]>([])
 const isCardOpen = ref(false)
-const isFlipping = ref(false)
 const currentTurn = ref(0)
 
 const toggleCard = () => {
-  if (isFlipping.value) return
-  isFlipping.value = true
   isCardOpen.value = !isCardOpen.value
-  isFlipping.value = false
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const { data } = await supabase.from('roles').select()
 
   roles.value = data || []
