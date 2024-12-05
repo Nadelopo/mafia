@@ -28,6 +28,7 @@ onBeforeMount(async () => {
   if (error) return
   roles.value = data
   selectOptions.value = data
+    .filter((e) => e.id !== -1)
     .sort((a, b) => Number(b.isRoleDark) - Number(a.isRoleDark))
     .map((e) => ({
       value: e.id,
