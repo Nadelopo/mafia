@@ -6,50 +6,52 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type GameRole = {
+  id: number
+  count: number
+}
+
 export type Database = {
   public: {
     Tables: {
       actions: {
         Row: {
           created_at: string
+          gameId: number
           id: number
-          roleId: number
-          roomId: number
-          targetId: number | null
+          playerId: number | null
+          targetId: string | null
           turn: number
-          userId: number
         }
         Insert: {
           created_at?: string
+          gameId: number
           id?: number
-          roleId: number
-          roomId: number
-          targetId?: number | null
+          playerId?: number | null
+          targetId?: string | null
           turn: number
-          userId: number
         }
         Update: {
           created_at?: string
+          gameId?: number
           id?: number
-          roleId?: number
-          roomId?: number
-          targetId?: number | null
+          playerId?: number | null
+          targetId?: string | null
           turn?: number
-          userId?: number
         }
         Relationships: [
           {
-            foreignKeyName: 'actions_roleId_fkey'
-            columns: ['roleId']
+            foreignKeyName: 'actions_gameId_fkey'
+            columns: ['gameId']
             isOneToOne: false
-            referencedRelation: 'roles'
+            referencedRelation: 'games'
             referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'actions_roomId_fkey'
-            columns: ['roomId']
+            foreignKeyName: 'actions_playerId_fkey'
+            columns: ['playerId']
             isOneToOne: false
-            referencedRelation: 'room_players'
+            referencedRelation: 'game_players'
             referencedColumns: ['id']
           },
           {
@@ -58,9 +60,51 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'users'
             referencedColumns: ['id']
+          }
+        ]
+      }
+      game_players: {
+        Row: {
+          created_at: string
+          gameId: number
+          id: number
+          roleId: number | null
+          status: Database['public']['Enums']['game_player_status']
+          userId: string
+        }
+        Insert: {
+          created_at?: string
+          gameId: number
+          id?: number
+          roleId?: number | null
+          status: Database['public']['Enums']['game_player_status']
+          userId: string
+        }
+        Update: {
+          created_at?: string
+          gameId?: number
+          id?: number
+          roleId?: number | null
+          status?: Database['public']['Enums']['game_player_status']
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'game_players_gameId_fkey'
+            columns: ['gameId']
+            isOneToOne: false
+            referencedRelation: 'games'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: 'actions_userId_fkey'
+            foreignKeyName: 'game_players_roleId_fkey'
+            columns: ['roleId']
+            isOneToOne: false
+            referencedRelation: 'roles'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'game_players_userId_fkey'
             columns: ['userId']
             isOneToOne: false
             referencedRelation: 'users'
@@ -68,28 +112,37 @@ export type Database = {
           }
         ]
       }
-      logs: {
+      games: {
         Row: {
           created_at: string
           id: number
-          roomId: number
+          leaderId: string
+          maxPlayers: number
+          roles: GameRole[]
+          gameActive: boolean
         }
         Insert: {
           created_at?: string
           id?: number
-          roomId: number
+          leaderId: string
+          maxPlayers: number
+          roles?: GameRole[]
+          gameActive?: boolean
         }
         Update: {
           created_at?: string
           id?: number
-          roomId?: number
+          leaderId?: string
+          maxPlayers?: number
+          roles?: GameRole[]
+          gameActive?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: 'logs_roomId_fkey'
-            columns: ['roomId']
+            foreignKeyName: 'games_leaderId_fkey'
+            columns: ['leaderId']
             isOneToOne: false
-            referencedRelation: 'rooms'
+            referencedRelation: 'users'
             referencedColumns: ['id']
           }
         ]
@@ -100,107 +153,29 @@ export type Database = {
           created_at: string
           description: string
           id: number
-          name: string
-          img: string
           title: string
+          isRoleDark: boolean
+          img: string
         }
         Insert: {
           abilities: string
           created_at?: string
           description: string
           id?: number
-          name: string
-          img: string
           title: string
+          isRoleDark?: boolean
+          img: string
         }
         Update: {
           abilities?: string
           created_at?: string
           description?: string
           id?: number
-          name?: string
+          title?: string
+          isRoleDark?: boolean
           img: string
-          title: string
         }
         Relationships: []
-      }
-      room_players: {
-        Row: {
-          created_at: string
-          id: number
-          roleId: number
-          roomId: number
-          status: Database['public']['Enums']['room_player_status']
-          userId: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          roleId: number
-          roomId: number
-          status: Database['public']['Enums']['room_player_status']
-          userId: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          roleId?: number
-          roomId?: number
-          status?: Database['public']['Enums']['room_player_status']
-          userId?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'room_players_roleId_fkey'
-            columns: ['roleId']
-            isOneToOne: false
-            referencedRelation: 'roles'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'room_players_roomId_fkey'
-            columns: ['roomId']
-            isOneToOne: false
-            referencedRelation: 'rooms'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'room_players_userId_fkey'
-            columns: ['userId']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      rooms: {
-        Row: {
-          created_at: string
-          id: number
-          maxPlayers: number
-          userId: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          maxPlayers: number
-          userId: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          maxPlayers?: number
-          userId?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'rooms_userId_fkey'
-            columns: ['userId']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
       }
       users: {
         Row: {
@@ -212,7 +187,7 @@ export type Database = {
         Insert: {
           created_at?: string
           email: string
-          id?: string
+          id: string
           name: string
         }
         Update: {
@@ -231,7 +206,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      room_player_status: 'killed' | 'prison' | 'play'
+      game_player_status: 'killed' | 'prison' | 'play'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -240,7 +215,6 @@ export type Database = {
 }
 
 type PublicSchema = Database[Extract<keyof Database, 'public'>]
-export type Table = keyof PublicSchema['Tables']
 
 export type Tables<
   PublicTableNameOrOptions extends
@@ -266,6 +240,8 @@ export type Tables<
       ? R
       : never
     : never
+
+export type Table = keyof Database['public']['Tables']
 
 export type TablesRow<
   PublicTableNameOrOptions extends

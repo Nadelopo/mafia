@@ -1,6 +1,16 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
-import { type FormInst, useMessage } from 'naive-ui'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import {
+  useMessage,
+  NForm,
+  NInput,
+  NButton,
+  NCard,
+  NFormItem,
+  type FormInst,
+  type FormRules
+} from 'naive-ui'
 import { supabase } from '@/supabase'
 
 const isLoginMode = ref(true)
@@ -14,7 +24,7 @@ const formValue = ref({
   password: ''
 })
 
-const rules = computed(() => ({
+const rules = computed<FormRules>(() => ({
   email: [
     { required: true, message: 'Email is required', trigger: 'blur' },
     {
@@ -52,6 +62,7 @@ const onSubmit = () => {
   })
 }
 
+const router = useRouter()
 const auth = async (type: 'signUp' | 'signIn') => {
   if (type === 'signUp') {
     const { data, error } = await supabase.auth.signUp({
@@ -85,11 +96,12 @@ const auth = async (type: 'signUp' | 'signIn') => {
       return
     }
   }
+  router.push({ name: 'Welcome' })
 }
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen p-5">
+  <div class="flex items-center justify-center min-h-screen">
     <n-card class="w-96">
       <transition name="fade" mode="out-in">
         <n-form
@@ -160,7 +172,6 @@ const auth = async (type: 'signUp' | 'signIn') => {
 .fade-leave-active {
   transition: opacity 0.3s ease-in-out;
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
