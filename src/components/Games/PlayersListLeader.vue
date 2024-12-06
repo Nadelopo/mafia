@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { inject, onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import { NButton } from 'naive-ui'
 import { supabase } from '@/supabase'
 import type { GameRole, TablesRow } from '@/supabase/database.types'
-import { gameInjectionKey } from '@/views/Game/gameInjection'
 import { useConnectPlayersSubscription } from './useConnectPlayersSubscription'
+import { useGameStore } from '@/stores/gameStore'
 
 export type Player = TablesRow<'game_players'> & {
   users: Pick<TablesRow<'users'>, 'name'>
@@ -12,7 +13,8 @@ export type Player = TablesRow<'game_players'> & {
 }
 
 const players = ref<Player[]>([])
-const { gameId, game } = inject(gameInjectionKey)!
+
+const { currentGameId, game } = storeToRefs(useGameStore())
 
 useConnectPlayersSubscription(
   () => players.value.length,
@@ -32,7 +34,7 @@ onBeforeMount(async () => {
   const { data, error } = await supabase
     .from('game_players')
     .select('*, users!inner(name), roles(*)')
-    .eq('gameId', gameId)
+    .eq('gameId', currentGameId.value)
     .order('id')
   if (error) return
 
@@ -61,7 +63,6 @@ const assignRoles = (playersCount: number, rolesDistribution: GameRole[]) => {
 
 const setRoleForPlayers = async () => {
   if (!game.value || game.value.gameActive) return
-  console.log('a')
   const assignedRoles = assignRoles(game.value.maxPlayers, game.value?.roles)
   if (!assignedRoles) return
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, provide, ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { supabase } from '@/supabase'
@@ -7,13 +7,15 @@ import type { TablesRow } from '@/supabase/database.types'
 import { useUserStore } from '@/stores/userStore'
 import Leader from './Leader.vue'
 import Player from './Player.vue'
-import { gameInjectionKey } from './gameInjection'
+import { useGameStore } from '@/stores/gameStore'
 
 const { isUserAuthenticated } = useUserStore()
 const { user } = storeToRefs(useUserStore())
 
+const { currentGameId } = storeToRefs(useGameStore())
+
 const route = useRoute()
-const gameId = Number(route.params.gameId)
+currentGameId.value = Number(route.params.gameId)
 
 const game = ref<TablesRow<'games'> | null>(null)
 
@@ -22,7 +24,7 @@ const isLeader = ref(false)
 
 onBeforeMount(async () => {
   const [{ data }, userData] = await Promise.all([
-    supabase.from('games').select().eq('id', gameId).single(),
+    supabase.from('games').select().eq('id', currentGameId.value).single(),
     isUserAuthenticated()
   ])
   isLoading.value = false
@@ -33,8 +35,6 @@ onBeforeMount(async () => {
     userData?.id && game.value && userData?.id === game.value?.leaderId
   )
 })
-
-provide(gameInjectionKey, { game, gameId })
 </script>
 
 <template>

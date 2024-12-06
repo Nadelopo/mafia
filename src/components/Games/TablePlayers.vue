@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NTable } from 'naive-ui'
+import { translatePlayerStatuses } from '../../shared/utils/translatePlayerStatuses'
 import type { TablesRow } from '@/supabase/database.types'
-import { translatePlayerStatuses } from './translatePlayerStatuses'
 
 type Player = TablesRow<'game_players'> & {
   users: Pick<TablesRow<'users'>, 'name'>

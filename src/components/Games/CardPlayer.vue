@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { TablesRow } from '@/supabase/database.types'
 import { NImage } from 'naive-ui'
+import type { TablesRow } from '@/supabase/database.types'
 
 defineProps<{
   playerRole: TablesRow<'roles'> | null
@@ -21,7 +21,7 @@ const toggleCard = () => {
     <div
       class="card-wrapper"
       :class="{ flipped: isCardOpen }"
-      @click="toggleCard"
+      @dblclick="toggleCard"
     >
       <div class="card front">
         <n-image

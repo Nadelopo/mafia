@@ -1,13 +1,14 @@
-import { inject, onUnmounted, watch } from 'vue'
+import { onUnmounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { supabase } from '@/supabase'
 import type { TablesRow } from '@/supabase/database.types'
-import { gameInjectionKey } from '@/views/Game/gameInjection'
+import { useGameStore } from '@/stores/gameStore'
 
 export const useConnectPlayersSubscription = (
   playersLength: () => number,
   callback: (id: number) => void
 ) => {
-  const { gameId, game } = inject(gameInjectionKey)!
+  const { currentGameId, game } = storeToRefs(useGameStore())
 
   const gamePlayersSubscription = supabase
     .channel('player-connection-tracking')
@@ -17,7 +18,7 @@ export const useConnectPlayersSubscription = (
         event: 'INSERT',
         schema: 'public',
         table: 'game_players',
-        filter: `gameId=eq.${gameId}`
+        filter: `gameId=eq.${currentGameId.value}`
       },
       async (payload) => {
         const player = payload.new as TablesRow<'game_players'>
