@@ -21,7 +21,7 @@ const { user } = storeToRefs(useUserStore())
 const message = useMessage()
 const router = useRouter()
 
-const pushToGame = (gameId: string | number) =>
+const goToGame = (gameId: string | number) =>
   router.push({ name: 'Game', params: { gameId } })
 
 const connectToGame = async () => {
@@ -37,7 +37,7 @@ const connectToGame = async () => {
   }
 
   if (game.leaderId === user.value.id) {
-    return pushToGame(gameCode.value)
+    return goToGame(gameCode.value)
   }
 
   const { error: createPlayerError } = await supabase
@@ -57,12 +57,26 @@ const connectToGame = async () => {
         .eq('userId', user.value.id)
         .single()
       if (player) {
-        pushToGame(player.gameId)
+        goToGame(player.gameId)
       }
     }
     return
   }
-  pushToGame(gameCode.value)
+  goToGame(gameCode.value)
+}
+
+const goOnCreatePage = async () => {
+  if (!user.value) return
+  const { data } = await supabase
+    .from('games')
+    .select()
+    .eq('leaderId', user.value.id)
+    .single()
+  if (data) {
+    message.warning('У вас уже есть игра')
+    return goToGame(data.id)
+  }
+  router.push({ name: 'CreateGame' })
 }
 </script>
 
@@ -91,11 +105,7 @@ const connectToGame = async () => {
       </div>
       <div class="wrapper">
         <h2 class="head">Создайте свою игру, и пригласите друзей!</h2>
-        <n-button
-          type="primary"
-          class="w-full"
-          @click="router.push({ name: 'CreateGame' })"
-        >
+        <n-button type="primary" class="w-full" @click="goOnCreatePage">
           Создать
         </n-button>
       </div>
