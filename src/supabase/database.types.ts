@@ -155,6 +155,7 @@ export type Database = {
           id: number
           title: string
           isRoleDark: boolean
+          img: string
         }
         Insert: {
           abilities: string
@@ -163,6 +164,7 @@ export type Database = {
           id?: number
           title: string
           isRoleDark?: boolean
+          img: string
         }
         Update: {
           abilities?: string
@@ -171,6 +173,7 @@ export type Database = {
           id?: number
           title?: string
           isRoleDark?: boolean
+          img: string
         }
         Relationships: []
       }

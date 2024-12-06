@@ -61,7 +61,7 @@ const assignRoles = (playersCount: number, rolesDistribution: GameRole[]) => {
 
 const setRoleForPlayers = async () => {
   if (!game.value || game.value.gameActive) return
-
+  console.log('a')
   const assignedRoles = assignRoles(game.value.maxPlayers, game.value?.roles)
   if (!assignedRoles) return
 

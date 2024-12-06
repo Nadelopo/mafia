@@ -6,8 +6,10 @@ import type { TablesRow } from '@/supabase/database.types'
 import { useUserStore } from '@/stores/userStore'
 import { gameInjectionKey } from '@/views/Game/gameInjection'
 import { useConnectPlayersSubscription } from './useConnectPlayersSubscription'
+import CardPlayer from '@/views/CardPlayer.vue'
+import TablePlayers from '@/components/Games/TablePlayers.vue'
 
-export type Player = TablesRow<'game_players'> & {
+type Player = TablesRow<'game_players'> & {
   users: Pick<TablesRow<'users'>, 'name'>
 }
 
@@ -94,10 +96,6 @@ useConnectPlayersSubscription(() => players.value.length, addPlayer)
 </script>
 
 <template>
-  <div>
-    <div>Твоя роль: {{ playerRole?.title }}</div>
-    <div v-for="player in players" :key="player.id">
-      {{ player.users.name }}
-    </div>
-  </div>
+  <card-player :player-role />
+  <table-players :players />
 </template>
