@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { supabase } from '@/supabase'
 import { useGameStore } from '@/stores/gameStore'
 import type { TablesRow } from '@/supabase/database.types'
 import { useUserStore } from '@/stores/userStore'
-import { useConnectPlayersSubscription } from '@/components/Games/useConnectPlayersSubscription'
+import { usePlayersSubscription } from '@/components/Games/usePlayersSubscription'
 import CardPlayer from '@/components/Games/CardPlayer.vue'
 import TablePlayers from '@/components/Games/TablePlayers.vue'
 
@@ -33,19 +34,29 @@ const getPlayerRole = async () => {
   return data?.roles ?? null
 }
 
-onBeforeMount(async () => {
-  const [{ data: playersData }, roleData] = await Promise.all([
-    supabase
-      .from('game_players')
-      .select('*, users!inner(name)')
-      .eq('gameId', currentGameId.value)
-      .order('id'),
-    getPlayerRole()
-  ])
+const router = useRouter()
+watch(
+  currentGameId,
+  async () => {
+    if (!currentGameId.value) return
 
-  players.value = playersData ?? []
-  playerRole.value = roleData
-})
+    const [{ data: playersData }, roleData] = await Promise.all([
+      supabase
+        .from('game_players')
+        .select('*, users!inner(name)')
+        .eq('gameId', currentGameId.value!)
+        .order('id'),
+      getPlayerRole()
+    ])
+
+    players.value = playersData ?? []
+    playerRole.value = roleData
+    if (!players.value.find((e) => user.value && e.userId === user.value.id)) {
+      router.push({ name: 'Welcome' })
+    }
+  },
+  { immediate: true }
+)
 
 const { user } = storeToRefs(useUserStore())
 
@@ -82,17 +93,22 @@ const gameStartSubscription = supabase
   )
   .subscribe()
 
-const addPlayer = async (id: number) => {
-  const { data, error } = await supabase
-    .from('game_players')
-    .select('*, users!inner(name), roles(*)')
-    .eq('id', id)
-    .single()
-  if (error) return
-  players.value.push(data)
-}
-
-useConnectPlayersSubscription(() => players.value.length, addPlayer)
+usePlayersSubscription({
+  onPlayerConnect: async (payload) => {
+    const { data, error } = await supabase
+      .from('game_players')
+      .select('*, users!inner(name), roles(*)')
+      .eq('id', payload.id)
+      .single()
+    if (error) return
+    players.value.push(data)
+  },
+  onPlayerDisconnect: async (payload) => {
+    if (players.value.find((e) => e.id === payload.id)) {
+      players.value = players.value.filter((player) => player.id !== payload.id)
+    }
+  }
+})
 </script>
 
 <template>

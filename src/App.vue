@@ -2,19 +2,31 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NConfigProvider, darkTheme, NMessageProvider, NButton } from 'naive-ui'
+import { NConfigProvider, darkTheme, NMessageProvider } from 'naive-ui'
 import { supabase } from '@/supabase'
 import { useUserStore } from '@/stores/userStore'
 import { useGameStore } from './stores/gameStore'
+import Header from './components/Header.vue'
 
 const { user } = storeToRefs(useUserStore())
 const { setUser } = useUserStore()
 
 const { setGame } = useGameStore()
+const { game } = storeToRefs(useGameStore())
 
 watch(
   () => user.value?.id,
   (id) => setGame(id)
+)
+
+const router = useRouter()
+watch(
+  game,
+  () => {
+    if (!game.value) return
+    router.push({ name: 'Game', params: { gameId: game.value.id } })
+  },
+  { once: true }
 )
 
 const eventValue = ref('')
@@ -24,28 +36,12 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     eventValue.value = event
   }
 })
-
-const router = useRouter()
-const signOut = () => {
-  supabase.auth.signOut()
-  router.push({ name: 'Auth' })
-}
-
-const isRouterReady = ref(false)
-router.isReady().then(() => (isRouterReady.value = true))
 </script>
 
 <template>
   <n-config-provider :theme="darkTheme">
     <n-message-provider>
-      <div class="container pb-6">
-        <n-button
-          v-if="isRouterReady && $route.name !== 'Auth'"
-          @click="signOut"
-        >
-          Выйти
-        </n-button>
-      </div>
+      <Header />
       <RouterView />
     </n-message-provider>
   </n-config-provider>

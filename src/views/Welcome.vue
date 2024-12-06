@@ -18,8 +18,6 @@ const onPaste = async () => {
   }
 }
 
-const { game, currentGameId, isGameLoading } = storeToRefs(useGameStore())
-
 const { user } = storeToRefs(useUserStore())
 const message = useMessage()
 const router = useRouter()
@@ -27,6 +25,7 @@ const router = useRouter()
 const goToGame = (gameId: string | number) =>
   router.push({ name: 'Game', params: { gameId } })
 
+const { setGame } = useGameStore()
 const connectToGame = async () => {
   if (!user.value) return
 
@@ -65,6 +64,7 @@ const connectToGame = async () => {
     }
     return
   }
+  setGame(user.value.id)
   goToGame(gameCode.value)
 }
 
@@ -89,48 +89,30 @@ const goOnCreatePage = async () => {
       <div>Добро пожаловать в Мафию!</div>
       <div>Создай игру или присоединись к существующей!</div>
     </h1>
-    <template v-if="!isGameLoading">
-      <div v-if="game">
-        <div class="my-6">
-          У вас уже есть игра
-          <n-button
-            type="primary"
-            class="ml-2"
-            @click="
-              router.push({ name: 'Game', params: { gameId: currentGameId } })
-            "
-          >
-            войти
+    <div class="content flex gap-6 flex-col md:flex-row">
+      <div class="wrapper">
+        <h2 class="head">Введите код, чтобы попасть в существующую игру</h2>
+        <n-input-group>
+          <n-input
+            v-model:value="gameCode"
+            type="text"
+            :allow-input="onlyAllowNumber"
+            placeholder="код"
+            maxlength="10"
+          />
+          <n-button v-if="gameCode" type="primary" @click="connectToGame">
+            Войти
           </n-button>
-        </div>
+          <n-button v-else type="primary" @click="onPaste"> Вставить </n-button>
+        </n-input-group>
       </div>
-      <div v-else class="content flex gap-6 flex-col md:flex-row">
-        <div class="wrapper">
-          <h2 class="head">Введите код, чтобы попасть в существующую игру</h2>
-          <n-input-group>
-            <n-input
-              v-model:value="gameCode"
-              type="text"
-              :allow-input="onlyAllowNumber"
-              placeholder="код"
-              maxlength="10"
-            />
-            <n-button v-if="gameCode" type="primary" @click="connectToGame">
-              Войти
-            </n-button>
-            <n-button v-else type="primary" @click="onPaste">
-              Вставить
-            </n-button>
-          </n-input-group>
-        </div>
-        <div class="wrapper">
-          <h2 class="head">Создайте свою игру, и пригласите друзей!</h2>
-          <n-button type="primary" class="w-full" @click="goOnCreatePage">
-            Создать
-          </n-button>
-        </div>
+      <div class="wrapper">
+        <h2 class="head">Создайте свою игру, и пригласите друзей!</h2>
+        <n-button type="primary" class="w-full" @click="goOnCreatePage">
+          Создать
+        </n-button>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 

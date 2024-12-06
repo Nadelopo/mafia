@@ -1,23 +1,35 @@
-import { ref } from 'vue'
-import { defineStore } from 'pinia'
-import type { TablesRow } from '@/supabase/database.types'
+import { computed, ref } from 'vue'
+import { defineStore, storeToRefs } from 'pinia'
 import { supabase } from '@/supabase'
+import type { TablesRow } from '@/supabase/database.types'
+import { useUserStore } from './userStore'
 
 export const useGameStore = defineStore('game', () => {
   const game = ref<TablesRow<'games'> | null>(null)
   const isGameLoading = ref(true)
-  const currentGameId = ref(-1)
+  const currentGameId = ref<number | null>(null)
 
-  function getGame(userId?: string) {
-    return supabase.from('games').select().match({ leaderId: userId })
-  }
+  const { user } = storeToRefs(useUserStore())
+  const isLeader = computed(
+    () => user.value && game.value && user.value.id === game.value.leaderId
+  )
 
+  let controller = new AbortController()
   async function setGame(userId?: string) {
+    controller.abort()
+    controller = new AbortController()
     isGameLoading.value = true
-
     const [{ data: gameData }, { data: playerData }] = await Promise.all([
-      getGame(userId),
-      supabase.from('game_players').select().match({ userId }).single()
+      supabase
+        .from('games')
+        .select()
+        .match({ leaderId: userId })
+        .abortSignal(controller.signal),
+      supabase
+        .from('game_players')
+        .select('games!inner(*)')
+        .match({ userId })
+        .abortSignal(controller.signal)
     ])
 
     const gameExists = gameData?.[0]
@@ -25,15 +37,16 @@ export const useGameStore = defineStore('game', () => {
       game.value = gameExists
       currentGameId.value = gameExists.id
     } else if (playerData) {
-      currentGameId.value = playerData.gameId
-      game.value = (await getGame(playerData.userId)).data?.[0] ?? null
+      currentGameId.value = playerData?.[0]?.games.id
+      game.value = playerData?.[0]?.games
     } else {
-      currentGameId.value = -1
+      currentGameId.value = null
       game.value = null
     }
 
     isGameLoading.value = false
+    return game.value
   }
 
-  return { game, setGame, currentGameId, isGameLoading }
+  return { game, setGame, currentGameId, isGameLoading, isLeader }
 })

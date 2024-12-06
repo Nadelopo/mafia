@@ -21,7 +21,7 @@ const toggleCard = () => {
     <div
       class="card-wrapper"
       :class="{ flipped: isCardOpen }"
-      @dblclick="toggleCard"
+      @click="toggleCard"
     >
       <div class="card front">
         <n-image
