@@ -4,8 +4,9 @@ import { NButton } from 'naive-ui'
 import { supabase } from '@/supabase'
 import { gameInjectionKey } from './gameInjection'
 import PlayersListLeader from '@/components/Games/PlayersListLeader.vue'
-import router from '@/router'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const { gameId, game } = inject(gameInjectionKey)!
 
 const startGame = async () => {
