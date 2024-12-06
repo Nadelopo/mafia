@@ -20,15 +20,24 @@ const onPaste = async () => {
 const { user } = storeToRefs(useUserStore())
 const message = useMessage()
 const router = useRouter()
+
+const goToGame = (gameId: string | number) =>
+  router.push({ name: 'Game', params: { gameId } })
+
 const connectToGame = async () => {
   if (!user.value) return
-  const { error } = await supabase
+
+  const { data: game, error } = await supabase
     .from('games')
-    .select('id')
+    .select(' leaderId')
     .eq('id', gameCode.value)
     .single()
   if (error) {
     return message.error('Игра не найдена')
+  }
+
+  if (game.leaderId === user.value.id) {
+    return goToGame(gameCode.value)
   }
 
   const { error: createPlayerError } = await supabase
@@ -39,8 +48,35 @@ const connectToGame = async () => {
       userId: user.value.id
     })
 
-  if (createPlayerError && createPlayerError.code !== '23505') return
-  router.push({ name: 'Game', params: { gameId: gameCode.value } })
+  if (createPlayerError) {
+    if (createPlayerError.code === '23505') {
+      message.warning('Вы уже в игре')
+      const { data: player } = await supabase
+        .from('game_players')
+        .select('gameId')
+        .eq('userId', user.value.id)
+        .single()
+      if (player) {
+        goToGame(player.gameId)
+      }
+    }
+    return
+  }
+  goToGame(gameCode.value)
+}
+
+const goOnCreatePage = async () => {
+  if (!user.value) return
+  const { data } = await supabase
+    .from('games')
+    .select()
+    .eq('leaderId', user.value.id)
+    .single()
+  if (data) {
+    message.warning('У вас уже есть игра')
+    return goToGame(data.id)
+  }
+  router.push({ name: 'CreateGame' })
 }
 </script>
 
@@ -69,11 +105,7 @@ const connectToGame = async () => {
       </div>
       <div class="wrapper">
         <h2 class="head">Создайте свою игру, и пригласите друзей!</h2>
-        <n-button
-          type="primary"
-          class="w-full"
-          @click="router.push({ name: 'CreateGame' })"
-        >
+        <n-button type="primary" class="w-full" @click="goOnCreatePage">
           Создать
         </n-button>
       </div>
