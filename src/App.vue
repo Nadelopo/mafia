@@ -20,11 +20,18 @@ const signOut = () => {
   supabase.auth.signOut()
   router.push({ name: 'Auth' })
 }
+
+const isRouterReady = ref(false)
+router.isReady().then(() => (isRouterReady.value = true))
 </script>
 
 <template>
   <n-config-provider :theme="darkTheme">
-    <button v-if="$route.name !== 'Auth'" class="ml-80" @click="signOut">
+    <button
+      v-if="isRouterReady && $route.name !== 'Auth'"
+      class="ml-80"
+      @click="signOut"
+    >
       Выйти
     </button>
     <n-message-provider>
