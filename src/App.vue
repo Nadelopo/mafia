@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { NConfigProvider, darkTheme, NMessageProvider } from 'naive-ui'
+import { darkTheme, NConfigProvider, NMessageProvider } from 'naive-ui'
 import { supabase } from '@/supabase'
 import { useUserStore } from '@/stores/userStore'
 
@@ -24,9 +24,7 @@ const signOut = () => {
 
 <template>
   <n-config-provider :theme="darkTheme">
-    <button v-if="$route.name !== 'Auth'" class="ml-80" @click="signOut">
-      Выйти
-    </button>
+    <button v-if="$route.name !== 'Auth'" @click="signOut">Выйти</button>
     <n-message-provider>
       <RouterView />
     </n-message-provider>

@@ -3,12 +3,12 @@ import { computed, nextTick, onBeforeMount, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import {
-  NInput,
-  NInputNumber,
+  NButton,
   NForm,
   NFormItem,
+  NInput,
+  NInputNumber,
   NSelect,
-  NButton,
   useThemeVars
 } from 'naive-ui'
 import type { SelectMixedOption } from 'naive-ui/es/select/src/interface'
@@ -112,11 +112,8 @@ const themeVars = useThemeVars()
 </script>
 
 <template>
-  <div class="flex flex-col items-center">
-    <n-form
-      class="w-80 flex flex-col justify-center"
-      @submit.prevent="onSubmit"
-    >
+  <div class="flex flex-col items-center container">
+    <n-form class="flex flex-col justify-center" @submit.prevent="onSubmit">
       <h1 class="text-2xl mb-4">Создайте свою игру</h1>
       <n-form-item path="playersCount" label="Количество игроков">
         <n-input-number

@@ -1,25 +1,23 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
-import { supabase } from '@/supabase'
+import { ref } from 'vue'
 import type { TablesRow } from '@/supabase/database.types'
+import { NImage } from 'naive-ui'
 
-const roles = ref<TablesRow<'roles'>[]>([])
+defineProps<{
+  playerRole: TablesRow<'roles'> | null
+}>()
+
 const isCardOpen = ref(false)
 const currentTurn = ref(0)
 
 const toggleCard = () => {
   isCardOpen.value = !isCardOpen.value
 }
-
-onBeforeMount(async () => {
-  const { data } = await supabase.from('roles').select()
-
-  roles.value = data || []
-})
 </script>
 
 <template>
-  <div class="flex flex-col items-center">
+  <div v-if="!playerRole">Ожидание распределения ролей...</div>
+  <div v-else class="flex flex-col items-center">
     <div
       class="card-wrapper"
       :class="{ flipped: isCardOpen }"
@@ -33,34 +31,18 @@ onBeforeMount(async () => {
           src="https://pmneozmbrbynumrlcqij.supabase.co/storage/v1/object/public/pictures/photo_2024-12-03_15-18-29%20(1).jpg"
         />
       </div>
-      <div class="card back bg-neutral-200">
+      <div class="card back">
         <n-image
           width="100%"
           preview-disabled
-          :src="roles?.[6]?.img"
+          :src="playerRole.img"
           class="mb-5 h-96"
         />
-        <p class="mb-2.5 text-2xl">{{ roles?.[1]?.title }}</p>
-        <p>{{ roles?.[1]?.description }}</p>
+        <p class="mb-2.5 text-2xl">{{ playerRole.title }}</p>
+        <p>{{ playerRole.description }}</p>
       </div>
     </div>
     <p class="text-2xl mb-5">{{ currentTurn }} ход</p>
-    <n-table :bordered="false" :single-line="false">
-      <thead>
-        <tr>
-          <th>Имя</th>
-          <th>Роль</th>
-          <th>Статус</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Влад</td>
-          <td>Доктор</td>
-          <td>В игре</td>
-        </tr>
-      </tbody>
-    </n-table>
   </div>
 </template>
 
