@@ -114,7 +114,10 @@ const themeVars = useThemeVars()
 
 <template>
   <div class="flex flex-col items-center container">
-    <n-form class="flex flex-col justify-center" @submit.prevent="onSubmit">
+    <n-form
+      class="w-full flex flex-col justify-center"
+      @submit.prevent="onSubmit"
+    >
       <h1 class="text-2xl mb-4">Создайте свою игру</h1>
       <n-form-item path="playersCount" label="Количество игроков">
         <n-input-number

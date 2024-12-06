@@ -27,14 +27,12 @@ router.isReady().then(() => (isRouterReady.value = true))
 
 <template>
   <n-config-provider :theme="darkTheme">
-    <button
-      v-if="isRouterReady && $route.name !== 'Auth'"
-      class="ml-80"
-      @click="signOut"
-    >
-      Выйти
-    </button>
     <n-message-provider>
+      <div class="container pb-6">
+        <button v-if="isRouterReady && $route.name !== 'Auth'" @click="signOut">
+          Выйти
+        </button>
+      </div>
       <RouterView />
     </n-message-provider>
   </n-config-provider>

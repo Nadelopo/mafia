@@ -38,7 +38,7 @@ provide(gameInjectionKey, { game, gameId })
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <div class="mb-5">Имя пользователя: {{ user?.name }}</div>
     <template v-if="!isLoading">
       <Leader v-if="isLeader" />
